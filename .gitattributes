@@ -1,0 +1,5 @@
+# LF everywhere: the shell scripts run in a Linux container, and the C6 build hashes nothing but sources.
+* text=auto eol=lf
+*.bin binary
+*.png binary
+*.jpg binary

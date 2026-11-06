@@ -1,0 +1,13 @@
+# Flash layout (16 MB) for the M5Stack Tab5 - identical to the firmware this example comes from, so the example can
+# be installed by OTA into that firmware's inactive app slot (same offsets, same 7 MB slots) and use its NVS.
+# The partition table sits at 0x10000 (CONFIG_PARTITION_TABLE_OFFSET), not at the default 0x8000: the ESP32-P4
+# bootloader of ESP-IDF 5.5 does not fit into 0x6000 bytes with INFO logs.
+#
+# Name,     Type, SubType,  Offset,    Size,      Flags
+nvs,        data, nvs,      0x11000,   0x6000,
+otadata,    data, ota,      0x17000,   0x2000,
+phy_init,   data, phy,      0x19000,   0x1000,
+nvs_keys,   data, nvs_keys, 0x1A000,   0x1000,    encrypted
+ota_0,      app,  ota_0,    0x20000,   0x700000,
+ota_1,      app,  ota_1,    0x720000,  0x700000,
+storage,    data, spiffs,   0xE20000,  0x1E0000,

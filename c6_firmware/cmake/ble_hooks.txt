@@ -1,0 +1,12 @@
+# Hooks in the copy of libble_app.a (ESP-IDF 5.5.5, esp32c6): <object in the archive> <symbol>.
+# The patch_ble_lib.cmake step weakens each symbol and adds an alias orig_<symbol> (recipe in that file).
+# Definitions: main/cis_c6_radio.c and main/cis_c6_llcp.c. After the build verify_hooks.py checks that every symbol
+# points to our code and orig_* to the library - also for calls from within the same object.
+ble_lll_conn.c.o r_ble_lll_conn_calc_first_anchor_point
+ble_lll_conn.c.o r_ble_lll_conn_update_buffer_hdr
+ble_ll_conn.c.o  r_ble_ll_conn_next_event
+ble_ll_ctrl.c.o  r_ble_ll_ctrl_rx_pdu
+ble_ll_ctrl.c.o  r_ble_ll_ctrl_enc_req_make
+ble_lll_conn.c.o r_ble_lll_conn_coex_dpc_process
+ble_lll_conn.c.o r_ble_lll_conn_recycle_buffer
+ble_lll_conn.c.o r_ble_lll_conn_end

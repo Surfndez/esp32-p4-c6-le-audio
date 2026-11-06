@@ -1,0 +1,44 @@
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_160=y
+
+# BT Configuration
+CONFIG_BT_ENABLED=y
+CONFIG_BT_CONTROLLER_ONLY=y
+CONFIG_BT_BLUEDROID_ENABLED=
+CONFIG_BT_LE_SLEEP_ENABLE=y
+
+# SPI/SDIO only
+CONFIG_BT_LE_HCI_INTERFACE_USE_RAM=y
+
+# BLE over UART:
+# Enable below config, delete sdkconfig, build/ and rebuild
+# CONFIG_BT_LE_HCI_INTERFACE_USE_UART=y
+# CONFIG_BT_LE_HCI_UART_TX_PIN=5
+# CONFIG_BT_LE_HCI_UART_RX_PIN=12
+# CONFIG_BT_LE_HCI_UART_FLOWCTRL=n
+# # 4 pin solution is not working yet for c6
+# #CONFIG_BT_LE_HCI_UART_RTS_PIN=9
+# #CONFIG_BT_LE_HCI_UART_CTS_PIN=13
+
+CONFIG_ESP_CACHE_MALLOC=n
+
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.esp32c6.csv"
+CONFIG_ESP_PKT_STATS=y
+
+# Cyberdeck v4: rolling back to the previous image is done by main/fw_guard.c (on every bootloader run).
+# Without bootloader rollback the otadata entry of the previous image gets the UNDEFINED state and is not
+# later reverted "back" to an unconfirmed image.
+# CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE is not set
+# CONFIG_BOOTLOADER_APP_ANTI_ROLLBACK is not set
+# Rolling back to the previous image at startup (SHA verification of the whole image) runs in the main task.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+
+# Cyberdeck v5 (LE Audio CIS):
+# - every CIS subevent is an extra connsm from the connection pool: 2 headsets at NSE 2 =
+#   2 ACL + 4 CIS (cis_c6_radio.c CIS_C6_MAX_LINKS x CIS_C6_MAX_NSE, checked by _Static_assert); about 1 kB of DRAM
+#   per connection.
+# - the CIS engine and hooks run in the controller task (design decision 6): engine frames, AES (mbedtls)
+#   and ESP_LOG from op_log add up to about 2.5 kB over stock (-fstack-usage: hci_set_cig 352, diag 336 + 288,
+#   update_buffer_hdr 304, drain_rx 304). The LL task's stack headroom is read by diagnostic 0xFC30 (subcommand 3).
+CONFIG_BT_LE_MAX_CONNECTIONS=6
+CONFIG_BT_LE_CONTROLLER_TASK_STACK_SIZE=6144

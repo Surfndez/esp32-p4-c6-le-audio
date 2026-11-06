@@ -1,0 +1,6 @@
+dependencies:
+  idf: '>=5.5'
+  # esp_hosted 1.4.0 comes from components/espressif__esp_hosted (patched copy, see its PATCHES.md); it needs
+  # esp_wifi_remote for its Wi-Fi channel registration even when the firmware does not use Wi-Fi.
+  espressif/esp_hosted: 1.4.0
+  espressif/esp_wifi_remote: 0.8.5

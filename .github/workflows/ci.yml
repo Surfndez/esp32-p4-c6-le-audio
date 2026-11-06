@@ -1,0 +1,76 @@
+# CI: CIS engine host tests + simulator, P4 model host tests, ESP32-C6 firmware build with hook verification,
+# p4_le_audio compile check and the tab5_player demo for the ESP32-P4. Every step runs in the pinned espressif/idf:v5.5.5 image (by digest), like the local scripts.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+# A newer push to the same branch cancels the run that is still going (only the latest result matters)
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IDF_IMAGE: espressif/idf:v5.5.5@sha256:a9231d0697ab8f7517cc072e93b7c83e04907bfbfba80b6440d7dbbf90665cf2
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch third-party sources (liblc3, dr_libs)
+        run: sh tools/fetch_deps.sh
+      - name: CIS engine unit tests (ASan + UBSan)
+        run: docker run --rm -v "$PWD:/src" -w /src --entrypoint bash "$IDF_IMAGE" -c "sh cis_ll/test/run.sh"
+      - name: CIS simulator gates
+        run: docker run --rm -v "$PWD:/src" -w /src --entrypoint bash "$IDF_IMAGE" -c "SIM_OUT=/tmp/sim sh cis_ll/sim/run.sh"
+      - name: P4 LE Audio model tests (with sanitizers)
+        run: docker run --rm -v "$PWD:/src" -w /src --entrypoint bash "$IDF_IMAGE" -c "SANITIZE=1 sh p4_le_audio/test/host/run.sh"
+      - name: Tool tests and privacy scan
+        run: |
+          python3 -I -m unittest discover -s tools/tests
+          python3 -I tools/privacy_scan.py
+
+  c6-firmware:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ESP32-C6 firmware (host tests, idf.py build, hook verification)
+        run: |
+          sh c6_firmware/build.sh 2>&1 | tee c6_build.log
+          grep -q "^RESULT: PASS" c6_build.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: c6_firmware
+          path: |
+            c6_firmware/build/network_adapter.bin
+            c6_firmware/build/network_adapter.elf
+
+  p4-compile-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build p4_le_audio for the ESP32-P4 (compile check firmware)
+        run: sh p4_le_audio/test/compile_check/build.sh
+
+  tab5-player:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the C6 firmware (the player embeds it)
+        run: |
+          sh c6_firmware/build.sh 2>&1 | tee c6_build.log
+          grep -q "^RESULT: PASS" c6_build.log
+      - name: Build tab5_player (ESP32-P4)
+        run: LE_AUDIO_CCACHE=0 sh examples/tab5_player/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tab5_player
+          path: |
+            examples/tab5_player/build/tab5_player.bin
+            examples/tab5_player/build/tab5_player.elf
+            examples/tab5_player/build/bootloader/bootloader.bin
+            examples/tab5_player/build/partition_table/partition-table.bin
+            examples/tab5_player/build/ota_data_initial.bin
+            examples/tab5_player/build/flash_args

@@ -1,0 +1,51 @@
+menu "tab5_player"
+
+    config TAB5_PLAYER_MUSIC_DIR
+        string "Music directory (searched recursively for *.mp3)"
+        default "/sd/music"
+
+    config TAB5_PLAYER_VOLUME
+        int "Digital volume (0-100) applied before LC3"
+        range 0 100
+        default 80
+        help
+            Gain before LC3: 10^((volume - 100) * 0.4 / 20), i.e. 80 = -8 dB. The earbuds keep their own volume.
+
+    config TAB5_PLAYER_LOG_TO_SD
+        bool "Copy the log to the SD card (/sd/tab5_player.log)"
+        default y
+        help
+            Every log line is also written to /sd/tab5_player.log (every 2 s, fsync'ed; the previous run is kept as
+            tab5_player.old), so a test without a PC watching the USB console still leaves a log. Writes only to
+            the SD card, never to flash.
+
+    config TAB5_PLAYER_ALLOW_PAIRING
+        bool "Pair new earbuds picked from the device list"
+        default y
+        help
+            On (default): "Find earbuds" (and the boot without saved earbuds) scans and lists the devices found;
+            the user taps theirs: a new one is paired (the second earbud of the set in the same session), a saved
+            one connects with its key and is paired again only if it rejects that key. Nothing is ever paired
+            without a tap.
+            Off: only earbuds already paired and saved in NVS (namespace "sec", key "bt.bond") are used; unknown
+            earbuds are never paired and no saved key is ever replaced.
+
+    config TAB5_PLAYER_SAVE_BONDS
+        bool "Save new pairings to NVS (writes the NVS partition)"
+        depends on TAB5_PLAYER_ALLOW_PAIRING
+        default y
+        help
+            Writes new bonds to NVS (namespace "sec", keys "bt.bond" / "bt.irk" - the same layout as the original
+            firmware), so paired earbuds reconnect after a reset. Turn off when testing on a device whose NVS belongs
+            to another firmware: new bonds then stay in RAM until reset.
+
+    config TAB5_PLAYER_START_FRESH
+        bool "Test: start as a fresh device (ignore saved earbuds, never touch NVS)"
+        default n
+        help
+            For testing the first-run pairing on a device that already has saved earbuds: the player does not
+            read or write NVS at all (overrides TAB5_PLAYER_SAVE_BONDS), starts with no saved earbuds and keeps a
+            new pairing in RAM until reset. Note: earbuds paired this way replace their key for this device's
+            address, so firmware that used the old key has to pair them again.
+
+endmenu

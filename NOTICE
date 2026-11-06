@@ -1,0 +1,44 @@
+esp32-p4-c6-le-audio
+Copyright (c) 2026 Ernest Domaradzki (visual_form) - MIT License (see LICENSE)
+
+The MIT license covers this project's own code: cis_ll/, the CIS adapter and fw_guard files in c6_firmware/main
+(cis_c6_*, fw_guard*), c6_firmware/cmake, p4_le_audio/, examples/tab5_player/ (except board_tab5.c), tools/ and docs/.
+
+Third-party code INCLUDED in this repository (each keeps its own license and copyright headers):
+
+- esp-hosted-mcu (Espressif Systems) - Apache License 2.0
+  https://github.com/espressif/esp-hosted-mcu
+  * c6_firmware/: the ESP32-C6 slave firmware sources (commit 96bea3a48e74, the base of the M5Stack Tab5 C6 image),
+    modified: CMakeLists.txt, main/CMakeLists.txt, main/Kconfig.projbuild, main/app_main.c, main/slave_bt.c,
+    main/slave_control.c, sdkconfig.defaults.esp32c6.
+  * components/espressif__esp_hosted/: the host component 1.4.0 (commit 6040085e), modified as listed in
+    components/espressif__esp_hosted/PATCHES.md.
+- ESP-IDF fatfs component v5.5.5 (Espressif Systems, Apache License 2.0; FatFs by ChaN under its own BSD-style
+  license): components/fatfs/, modified as listed in components/fatfs/PATCHES.md (exFAT, 16 kB SD transfers).
+- protobuf-c (Dave Benson and the protobuf-c authors) - BSD 2-Clause License, as shipped inside esp-hosted-mcu
+  (c6_firmware/main/common/protobuf-c, components/espressif__esp_hosted/common/protobuf-c).
+- M5Stack Tab5 board support (Espressif Systems / M5Stack) - Apache License 2.0: components/m5stack_tab5 (modified)
+  and components/esp_lcd_st7121; examples/tab5_player/main/board_tab5.c uses the BSP and adapts its SD card mount.
+- ESP-IDF v5.5.5 esp_lcd and esp_driver_ppa, esp-bsp esp_lvgl_port 2.5.0 (Espressif Systems) - Apache License 2.0:
+  components/esp_lcd, components/esp_driver_ppa, components/espressif__esp_lvgl_port (modified, see
+  components/DISPLAY_PATCHES.md).
+- LVGL 9.2.2 (MIT) - ESP Component Registry, fetched at build time.
+
+Third-party code NOT included (fetched or taken from ESP-IDF at build time):
+
+- ESP-IDF v5.5.5 (Espressif Systems) - Apache License 2.0
+  https://github.com/espressif/esp-idf
+- ESP32-C6 Bluetooth LE controller library esp32c6-bt-lib (libble_app.a, Espressif Systems) - see its NOTICE in
+  ESP-IDF components/bt/controller/lib_esp32c6. It is taken from your ESP-IDF installation at build time, and a copy
+  with selected symbols weakened (objcopy --weaken-symbol) is linked so that the CIS link layer can hook it.
+  Pre-built release binaries contain it as linked by ESP-IDF.
+- ESP32-C6 PHY libraries (libphy.a, libbtbb.a, Espressif Systems) - Apache License 2.0 (via ESP-IDF)
+- liblc3 v1.1.3 (Google LLC) - Apache License 2.0 - fetched by tools/fetch_deps.sh into third_party/
+  https://github.com/google/liblc3
+- dr_libs / dr_mp3 (David Reid) - public domain or MIT No Attribution - fetched by tools/fetch_deps.sh
+  https://github.com/mackron/dr_libs
+- esp_wifi_remote and its dependencies (Espressif Systems) - Apache License 2.0 - ESP Component Registry
+
+Bluetooth(R) is a registered trademark of Bluetooth SIG, Inc. Samsung and Galaxy Buds are trademarks of Samsung
+Electronics Co., Ltd. M5Stack and Tab5 are trademarks of M5Stack Technology Co., Ltd. This project is not affiliated
+with or endorsed by any of them.

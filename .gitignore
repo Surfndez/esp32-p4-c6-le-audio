@@ -1,0 +1,21 @@
+# Build output
+build/
+build_*/
+c6_firmware/main/coprocessor_fw_version.h
+examples/*/managed_components/
+examples/*/dependencies.lock
+examples/*/sdkconfig
+examples/*/sdkconfig.old
+p4_le_audio/test/compile_check/managed_components/
+p4_le_audio/test/compile_check/dependencies.lock
+p4_le_audio/test/compile_check/sdkconfig
+p4_le_audio/test/compile_check/sdkconfig.old
+c6_firmware/sdkconfig.old
+# CIS simulator logs
+cis_ll/sim/out/
+# Fetched by tools/fetch_deps.sh
+third_party/
+__pycache__/
+*.pyc
+# Release packages (attached to GitHub Releases, not committed)
+release/
